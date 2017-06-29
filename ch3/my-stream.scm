@@ -19,6 +19,5 @@
 (define (stream-ref s n)
   (if (= n 0)
       (stream-car s)
-      (stream-ref (stream-cdr s) (- n 1))))a
+      (stream-ref (stream-cdr s) (- n 1))))
 
- 
