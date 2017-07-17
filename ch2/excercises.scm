@@ -37,3 +37,87 @@
 (car ''abracadabra)
 
 ;; (car (quote 'abracadabra)) と展開されるから
+
+;; 2.56
+
+(define (exponentiation? x)
+  (and (pair? x) (eq? (car x) '**)))
+
+(define (base x)
+  (cadr x))
+
+(define (exponent x)
+  (caddr x))
+
+(define (make-exponentiation a n)
+  (cond ((= n 0) 1)
+        ((= n 1) a)
+        (#t (list '** a n))))
+
+;; exercise 2.57
+
+(define (variable? x) (symbol? x))
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (sum? x)
+  (and (pair? x) (eq? (car x) '+)))
+
+(define (addend s) (cadr s))
+
+(define (augend s)
+  (if (= (length (cddr s)) 1)
+      (caddr s)
+      (cons '+ (cddr s))))
+
+(define (product? x)
+  (and (pair? x) (eq? (car x) '*)))
+
+(define (multiplier p) (cadr p))
+
+(define (multiplicand p)
+  (if (= (length (cddr p)) 1)
+      (caddr p)
+      (cons '* (cddr p))))
+
+(define (=number? exp num)
+  (and (number? exp) (= exp num)))
+
+(define (make-sum first rest)
+  (display "+first: ") (display first) (display ", rest: ") (display rest) (display "\n")
+  (cond ((null? rest) first)
+        ((and (number? first) (number? rest))
+         (+ first rest))
+        ((=number? first 0) (make-sum (car rest) (cdr rest)))
+        ((=number? rest 0) first)
+        (else (cons '+ (cons first rest)))))
+
+(define (make-product first rest)
+  (display "*first: ") (display first) (display ", rest: ") (display rest) (display "\n")
+  (cond ((null? rest) first)
+        ((product? rest) (make-product first (cdr rest)))
+        ((or (=number? first 0) (=number? rest 0)) 0)
+        ((and (=number? first 1) (variable? rest)) (list rest))
+        ((and (=number? first 1) (pair? rest)) (make-product (car rest) (cdr rest)))
+        ((and (number? first) (number? rest)) (* first rest))
+        (else (cons '* (cons first (list rest))))))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp)
+         (if (same-variable? exp var) 1 0))
+        ((sum? exp)
+         (make-sum (deriv (addend exp) var)
+                   (deriv (augend exp) var)))
+        ((product? exp)
+         (make-sum
+           (make-product (multiplier exp)
+                         (deriv (multiplicand exp) var))
+           (make-product (deriv (multiplier exp) var)
+                         (multiplicand exp))))
+        ((exponentiation? exp)
+         (make-product (exponent exp)
+                       (make-exponentiation (base exp)
+                                            (- (exponent exp) 1))))
+        (else
+         (error "unknown expression type -- DERIV" exp))))
