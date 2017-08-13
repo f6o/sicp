@@ -21,49 +21,56 @@
 (define (=number? exp num)
   (and (number? exp) (= exp num)))
 
-(define (make-sum exps result n)
-  (cond
-   ((and (null? exps) (null? result)) n)
-   ((and (null? exps) (= n 0)) result)
-   ((null? exps) (cons n result))
-   ((=number? (car exps) 0)
-    (make-sum (cdr exps) result n))
-   ((number? (car exps))
-    (make-sum (cdr exps) result (+ (car exps) n)))
-   (else
-    (make-sum (cdr exps) (cons (car exps) result) n))))
+(define (make-sum exps)
+  (define (make-sum-inner exps result n)
+    (cond
+     ((and (null? exps) (null? result)) (list n))
+     ((and (null? exps) (= n 0)) result)
+     ((null? exps) (cons n result))
+     ((=number? (car exps) 0)
+      (make-sum-inner (cdr exps) result n))
+     ((number? (car exps))
+      (make-sum-inner (cdr exps) result (+ (car exps) n)))
+     (else
+      (make-sum-inner (cdr exps) (cons (car exps) result) n))))
+  (let ((result (make-sum-inner exps '() 0)))
+    (if (> (length result) 1)
+        (cons '+ result)
+        (car result))))
 
-(define (make-product exps result n)
-  (display 'make-product)
-  (display exps)
-  (display (newline))
-  (cond
-   ((and (null? exps) (null? result)) n)
-   ((and (null? exps) (= n 0)) result)
-   ((null? exps) (cons n result))
-   ((=number? (car exps) 0) 0)
-   ((number? (car exps))
-    (make-product (cdr exps) result (* (car exps) n)))
-   (else
-    (make-product (cdr exps) (cons (car exps) result) n))))
+(define (make-product exps) 
+  (define (make-product-inner exps result n)
+    (cond
+     ((and (null? exps) (null? result)) (list n))
+     ((and (null? exps) (= n 1)) result)
+     ((null? exps) (cons n result))
+     ((=number? (car exps) 0) (list 0))
+     ((=number? (car exps) 1)
+      (make-product-inner (cdr exps) result n))
+     ((number? (car exps))
+      (make-product-inner (cdr exps) result (* (car exps) n)))
+     (else
+      (make-product-inner (cdr exps) (cons (car exps) result) n))))
+  (let ((result
+         (make-product-inner exps '() 1)))
+    (if (> (length result) 1)
+        (cons '* result)
+        (car result))))
 
 (put 'deriv '+ (lambda (exps var)
                  (make-sum
-                  (map (lambda (exp) (deriv exp var))
-                       exps) '() 0)))
+                  (map (lambda (exp) (deriv exp var)) exps))))
 
 (put 'deriv '* (lambda (exps var)
                  (make-sum
-                  (map
-                   (lambda (n exps)
-                     (list-set! exps n
-                                (deriv (list-ref exps n) var))
-                             (make-product exps '() 1))
-                   (iota (length exps))
-                   (map (lambda (exp)
-                          (list-copy exps))
-                        exps))
-                  '() 0)))
+                  (map (lambda (n exps)
+                         (list-set! exps n
+                                    (deriv (list-ref exps n) var))
+                         (make-product exps))
+                       (iota (length exps))
+                       (map (lambda (exp)
+                              (list-copy exps))
+                            exps)))))
 
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
@@ -74,3 +81,4 @@
          (if (same-variable? exp var) 1 0))
         (else ((get 'deriv (operator exp))
                (operands exp) var))))
+
