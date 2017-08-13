@@ -61,6 +61,7 @@
                  (make-sum
                   (map (lambda (exp) (deriv exp var)) exps))))
 
+;; (ABC)' = A'BC + AB'C + ABC'
 (put 'deriv '* (lambda (exps var)
                  (make-sum
                   (map (lambda (n exps)
@@ -72,6 +73,7 @@
                               (list-copy exps))
                             exps)))))
 
+
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
 
@@ -81,4 +83,42 @@
          (if (same-variable? exp var) 1 0))
         (else ((get 'deriv (operator exp))
                (operands exp) var))))
+
+;; exercise 2.73 c
+(define (make-exponential base exponential)
+  (cond ((=number? base 1) 1)
+        ((=number? exponential 0) 1)
+        ((and (number? base) (number? exponential))
+         (fold * 1 (make-list exponential base)))
+        (else (list '** base exponential))))
+
+(define (base exps) (car exps))
+(define (exponential exps) (cadr exps))
+
+(put 'deriv '** (lambda (exps var)
+                  (if (= (length exps) 2)
+                      (make-product
+                       (list (exponential exps)
+                             (make-exponential
+                              (base exps)
+                              (make-sum
+                               (list (exponential exps) -1)))))
+                      (error "** should be two arguments."))))
+
+(define (numerator exps) (car exps))
+(define (denominators exps) (cdr exps))
+(define (make-quotient exps)
+  (list '/
+        (numerator exps)
+        (make-product (denominators exps))))
+
+(define (logarithm exps) (car exps))
+
+(put 'deriv 'log (lambda (exps var)
+                   (if (= (length exps) 1)
+                       (make-quotient (cons
+                                       (deriv (logarithm exps) var)
+                                       exps))
+                       (error "log should be one argument"))))
+
 
