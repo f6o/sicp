@@ -121,4 +121,6 @@
                                        exps))
                        (error "log should be one argument"))))
 
-
+;; TODO
+(put 'deriv '/ (lambda (exps var)
+                 (error "not implemented")))
