@@ -19,6 +19,7 @@
 (define (eval exp env)
   (display "evaluating: ")
   (display exp)
+  (display (newline))
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
@@ -38,11 +39,33 @@
         (else
          (error "Unknown expression type -- EVAL" exp))))
 
+
 (define (list-of-values exps env)
   (if (no-operands? exps)
       '()
       (cons (eval (first-operand exps) env)
             (list-of-values (rest-operands exps) env))))
+
+;; exercise 4.1 left to right
+
+(define (list-of-values-lr exps env)
+  (if (no-operands? exps)
+      '()
+      (let ((result (eval (first-operand exps) env)))
+	(cons result
+	      (list-of-values (rest-operands exps) env)))))
+
+;; exercise 4.1 right to left ??
+
+(define (list-of-values-rl exps env)
+  (display "r2l: ")
+  (display exps)
+  (display (newline))
+  (if (no-operands? exps)
+      '()
+      (let ((rest (list-of-values (rest-operands exps) env)))
+	(cons (eval (first-operand exps) env)
+	      rest))))
 
 (define (eval-if exp env)
   (if (true? (eval (if-predicate exp) env))
