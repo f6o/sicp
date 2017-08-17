@@ -199,7 +199,7 @@
 
 (put 'cond
      (lambda (exp env)
-       (eval (cond-if exp) env)))
+       (eval (cond->if exp) env)))
 
 (define (cond-clauses exp) (cdr exp))
 
@@ -207,8 +207,13 @@
   (eq? (cond-predicate clause) 'else))
 
 (define (cond-predicate clause) (car clause))
-
 (define (cond-actions clause) (cdr clause))
+
+(define (cond-extend-clause? clause)
+  (eq? (cond-extend-tag clause) '=>))
+
+(define (cond-extend-tag clause) (cadr clause))
+(define (cond-extend-proc clause) (caddr clause))
 
 (define (cond->if exp)
   (expand-clauses (cond-clauses exp)))
@@ -218,14 +223,20 @@
       'false                          ; no else clause
       (let ((first (car clauses))
             (rest (cdr clauses)))
-        (if (cond-else-clause? first)
-            (if (null? rest)
-                (sequence->exp (cond-actions first))
-                (error "ELSE clause isn't last -- COND->IF"
-                       clauses))
-            (make-if (cond-predicate first)
-                     (sequence->exp (cond-actions first))
-                     (expand-clauses rest))))))
+	(cond ((cond-else-clause? first)
+	       (if (null? rest)
+		   (sequence->exp (cond-actions first))
+		   (error "ELSE clause isn't last -- COND->IF"
+			  clauses)))
+	      ((cond-extend-clause? first)
+	       (let ((val (cond-predicate first)))
+		 (make-if val
+			  (list (cond-extend-proc first)
+				val)
+			  (expand-clauses rest))))
+	      (else (make-if (cond-predicate first)
+			     (sequence->exp (cond-actions first))
+			     (expand-clauses rest)))))))
 
 (define (true? x)
   (not (eq? x #f)))
