@@ -53,9 +53,9 @@
       '()
       (let ((result (eval (first-operand exps) env)))
 	(cons result
-	      (list-of-values (rest-operands exps) env)))))
+	      (list-of-values-lr (rest-operands exps) env)))))
 
-;; exercise 4.1 right to left ??
+;; exercise 4.1 right to left
 
 (define (list-of-values-rl exps env)
   (display "r2l: ")
@@ -63,7 +63,7 @@
   (display (newline))
   (if (no-operands? exps)
       '()
-      (let ((rest (list-of-values (rest-operands exps) env)))
+      (let ((rest (list-of-values-rl (rest-operands exps) env)))
 	(cons (eval (first-operand exps) env)
 	      rest))))
 
