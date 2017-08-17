@@ -36,28 +36,44 @@
       (cons (eval (first-operand exps) env)
             (list-of-values (rest-operands exps) env))))
 
-(define (eval-if exp env)
-  (if (true? (eval (if-predicate exp) env))
-      (eval (if-consequent exp) env)
-      (eval (if-alternative exp) env)))
-
+;; used in begin and apply
 (define (eval-sequence exps env)
   (cond ((last-exp? exps) (eval (first-exp exps) env))
         (else (eval (first-exp exps) env)
               (eval-sequence (rest-exps exps) env))))
 
-(define (eval-assignment exp env)
-  (set-variable-value! (assignment-variable exp)
-                       (eval (assignment-value exp) env)
-                       env)
-  'ok)
+;; excercise 4.4: and & or
+(define (expressions exp) (cdr exp))
 
-(define (eval-definition exp env)
-  (define-variable! (definition-variable exp)
-                    (eval (definition-value exp) env)
-                    env)
-  'ok)
+(define (eval-and-expressions exps env)
+  (cond ((last-exp? exps)
+	 (eval (first-exp exps) env))
+	(else (if (eval (first-exp exps) env)
+		  (eval-expressions (rest-exps exps) env)
+		  false))))
 
+(define (eval-and exp env)
+  (cond ((pair? (expressions exp))
+	 (eval-and-expressions (expressions exp) env))
+	(else #t)))
+
+(put 'and eval-and)
+
+(define (eval-or-expressions exps env)
+  (cond ((last-exp? exps)
+	 (eval (first-exp exps) env))
+	(else
+	 (let ((val (eval (first-exp exps) env)))
+	   (if val
+	       val
+	       (eval-expressions (rest-exps exps) env))))))
+
+(define (eval-or exp env)
+  (cond ((pair? (expressions exp))
+	 (eval-or-expressions (expressions exp) env))
+	(else #f)))
+
+(put 'or eval-or)
 ;; self-evaluating
 
 (define (self-evaluating? exp)
@@ -85,6 +101,11 @@
 
 ;; set!
 
+(define (eval-assignment exp env)
+  (set-variable-value! (assignment-variable exp)
+                       (eval (assignment-value exp) env)
+                       env)
+  'ok)
 (put 'set! eval-assignment)
 
 (define (assignment-variable exp) (cadr exp))
@@ -93,6 +114,11 @@
 
 ;; define
 
+(define (eval-definition exp env)
+  (define-variable! (definition-variable exp)
+                    (eval (definition-value exp) env)
+                    env)
+  'ok)
 (put 'define eval-definition)
 
 (define (definition-variable exp)
@@ -120,6 +146,11 @@
   (cons 'lambda (cons parameters body)))
 
 ;; if
+
+(define (eval-if exp env)
+  (if (true? (eval (if-predicate exp) env))
+      (eval (if-consequent exp) env)
+      (eval (if-alternative exp) env)))
 
 (put 'if eval-if)
 
@@ -170,8 +201,6 @@
      (lambda (exp env)
        (eval (cond-if exp) env)))
 
-(define (cond? exp) (tagged-list? exp 'cond))
-
 (define (cond-clauses exp) (cdr exp))
 
 (define (cond-else-clause? clause)
@@ -213,7 +242,6 @@
 (define (procedure-parameters p) (cadr p))
 (define (procedure-body p) (caddr p))
 (define (procedure-environment p) (cadddr p))
-
 
 (define (enclosing-environment env) (cdr env))
 
