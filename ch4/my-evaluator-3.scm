@@ -74,6 +74,9 @@
 	(else #f)))
 
 (put 'or eval-or)
+
+;; TODO: implement and & or as derived form
+
 ;; self-evaluating
 
 (define (self-evaluating? exp)
