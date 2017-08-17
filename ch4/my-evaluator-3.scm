@@ -1,3 +1,5 @@
+;; exercise 4.3
+
 (define apply-in-underlying-scheme apply)
 
 (define (apply procedure arguments)
