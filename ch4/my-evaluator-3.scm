@@ -242,6 +242,8 @@
 (define (cond-predicate clause) (car clause))
 (define (cond-actions clause) (cdr clause))
 
+;; excercise 4.5
+
 (define (cond-extend-clause? clause)
   (eq? (cond-extend-tag clause) '=>))
 
