@@ -273,6 +273,31 @@
 			     (sequence->exp (cond-actions first))
 			     (expand-clauses rest)))))))
 
+;; exercise 4.6 let
+
+(define (let->combination exp)
+  (let ((bindings (let-bindings exp)))
+    (cons (make-lambda (vars-in-bindings bindings)
+		       (let-body exp))
+	  (exps-in-bindings bindings))))
+
+(define (let-bindings exp)
+  (cadr exp))
+
+(define (vars-in-bindings bindings)
+  (map car bindings))
+
+(define (exps-in-bindings bindings)
+  (map cadr bindings))
+
+(define (let-body exp)
+  (cddr exp))
+
+(put 'let (lambda (exp env)
+	    (eval (let->combination exp) env)))
+
+;; ---
+
 (define (true? x)
   (not (eq? x #f)))
 
