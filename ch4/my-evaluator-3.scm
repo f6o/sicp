@@ -77,6 +77,36 @@
 
 ;; TODO: implement and & or as derived form
 
+(define (expand-and exps)
+  (if (last-exp? exps)
+      (car exps)
+      (let ((first (car exps))
+	    (rest (cdr exps)))
+	(make-if first
+		 (expand-and rest)
+		 'false))))
+
+(define (and->if exp)
+  (expand-and (expressions exp)))
+
+(put 'and2 (lambda (exp env)
+	     (eval (and->if exp) env)))
+
+(define (expand-or exps)
+  (if (last-exp? exps)
+      (car exps)
+      (let ((first (car exps))
+	    (rest (cdr exps)))
+	(make-if first
+		 first
+		 (expand-and rest)))))
+
+(define (or->if exps)
+  (expand-or (expressions exps)))
+
+(put 'or2 (lambda (exp env)
+	    (eval (or->if exp) env)))
+
 ;; self-evaluating
 
 (define (self-evaluating? exp)
