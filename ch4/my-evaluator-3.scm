@@ -314,9 +314,8 @@
 ;;
 ;; (let ((x 3))
 ;;   (let ((y (+ x 2)))
-;;     (let ((z (+ x y 5))))
-;;     (* x z)))
-;;
+;;     (let ((z (+ x y 5)))
+;;       (* x z))))
 
 ;; TODO: I think it's un-natural to wrap make-let with list.
 (define (let*->nested-lets exp)
@@ -326,6 +325,9 @@
 	(list (make-let (car bindings)
 			(inner (cdr bindings))))))
   (car (inner (let-bindings exp))))
+
+(put 'let* (lambda (exp env)
+	     (eval (let*->nested-lets exp) env)))
 
 ;; ---
 
@@ -420,7 +422,8 @@
         (list 'cons cons)
         (list 'null? null?)
 	(list 'list list)
-	(list '+ +)))
+	(list '+ +)
+	(list '* *)))
 
 (define (primitive-procedure-names)
   (map car
