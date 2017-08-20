@@ -75,7 +75,7 @@
 
 (put 'or eval-or)
 
-;; TODO: implement and & or as derived form
+;; and & or as derived form
 
 (define (expand-and exps)
   (if (last-exp? exps)
@@ -295,6 +295,37 @@
 
 (put 'let (lambda (exp env)
 	    (eval (let->combination exp) env)))
+
+;; exercise 4.7 let*
+
+(define (make-let bindings body)
+  (cons 'let
+	(cons
+	 (list bindings)
+	 body)))
+
+;;
+;; (let* ((x 3)
+;;        (y (+ x 2))
+;;        (z (+ x y 5)))
+;;   (* x z))
+;;
+;; the let* expression should be translated into:
+;;
+;; (let ((x 3))
+;;   (let ((y (+ x 2)))
+;;     (let ((z (+ x y 5))))
+;;     (* x z)))
+;;
+
+;; TODO: I think it's un-natural to wrap make-let with list.
+(define (let*->nested-lets exp)
+  (define (inner bindings)
+    (if (null? bindings)
+	(let-body exp)
+	(list (make-let (car bindings)
+			(inner (cdr bindings))))))
+  (car (inner (let-bindings exp))))
 
 ;; ---
 
