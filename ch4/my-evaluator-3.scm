@@ -281,6 +281,26 @@
 		       (let-body exp))
 	  (exps-in-bindings bindings))))
 
+(define (named-let? exp)
+  (and (tagged-list? exp 'let)
+       (variable? (cadr exp))
+       (pair? (cdddr exp))))
+
+(define (named-let->let exp)
+  (let ((bindings (named-let-bindings exp)))
+    (list 'let
+	  '() 
+	  (list 'define
+		(named-let-name exp)
+		(make-lambda (vars-in-bindings bindings)
+			     (named-let-body exp)))
+	  (cons (named-let-name exp)
+		(exps-in-bindings bindings)))))
+
+(define (named-let-name exp) (cadr exp))
+(define (named-let-bindings exp) (caddr exp))
+(define (named-let-body exp) (cdddr exp))
+
 ;; TODO: why f can't be found?
 ;;
 ;; (let ((f (lambda (n)
@@ -293,10 +313,10 @@
 ;;
 ;; example 1:
 ;; 
-;; (let f ((n 5))
-;;   (if (= n 1)
-;;       1
-;;       (* n (f (- n 1)))))
+(let f ((n 5))
+  (if (= n 1)
+      1
+      (* n (f (- n 1)))))
 ;;
 ;; (let ()
 ;;   (define f (lambda (n)
