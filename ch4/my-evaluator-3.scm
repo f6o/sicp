@@ -281,6 +281,51 @@
 		       (let-body exp))
 	  (exps-in-bindings bindings))))
 
+;; TODO: why f can't be found?
+;;
+;; (let ((f (lambda (n)
+;; 	   (if (= n 1)
+;; 	       1
+;; 	       (* n (f (- n 1)))))))
+;;   (f 5))
+
+;; exercise 4.8 named-let
+;;
+;; example 1:
+;; 
+;; (let f ((n 5))
+;;   (if (= n 1)
+;;       1
+;;       (* n (f (- n 1)))))
+;;
+;; (let ()
+;;   (define f (lambda (n)
+;; 	      (if (= n 1)
+;; 		  1
+;; 		  (* n (f (- n 1))))))
+;;   (f 5))
+;;
+;; example 2
+;;
+;; (define (fib n)
+;;   (let fib-iter ((a 1)
+;; 		 (b 0)
+;; 		 (count n))
+;;     (if (= count 0)
+;; 	b
+;; 	(fib-iter (+ a b) a (- count 1)))))
+;;
+;; will be translated into:
+;;
+;; (define (fib n)
+;;   (let ()
+;;     (define fib-iter
+;;       (lambda (a b count)
+;; 	(if (= count 0)
+;; 	    b
+;; 	    (fib-iter (+ a b) a (- count 1)))))
+;;     (fib-iter 1 0 n)))
+
 (define (let-bindings exp)
   (cadr exp))
 
