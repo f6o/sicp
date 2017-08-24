@@ -396,6 +396,51 @@
 (put 'let* (lambda (exp env)
 	     (eval (let*->nested-lets exp) env)))
 
+;; exercise 4.9: do-while
+;;
+;; (do-while (<condition> <return-value>)
+;;      <body>)
+;;
+;; (let do-while ()
+;;      (begin <body>)
+;;      (if <condition>
+;;          (do-while)
+;;          <return-value>))
+;;
+;; Example:
+;;
+;; (let ((a 10) (b 0))
+;;   (do-while ((> a 1) b)
+;; 	    (set! b (+ b a))
+;; 	    (set! a (- a 1))))
+;;
+;; will be translated into
+;;
+;; (let ((a 10) (b 0))
+;;   (let do-while ()
+;;     (begin  
+;;       (set! b (+ b a))
+;;       (set! a (- a 1)))
+;;     (if (> a 0)
+;; 	(do-while)
+;; 	b)))
+
+(define (do-while->named-let exp)
+  (list 'let 'do-while (list)
+	(make-begin (do-while-body exp))
+	(make-if (do-while-condition exp)
+		 (list 'do-while)
+		 (do-while-return-exp exp))))
+
+(define (do-while-condition exp)
+  (caadr exp))
+
+(define (do-while-return-exp exp)
+  (cadadr exp))
+
+(define (do-while-body exp)
+  (cddr exp))
+
 ;; ---
 
 (define (true? x)
@@ -491,8 +536,10 @@
 	(list 'list list)
 	(list '+ +)
 	(list '- -)
+	(list '* *)
 	(list '= =)
-	(list '* *)))
+	(list '> >)
+	(list '< <)))
 
 (define (primitive-procedure-names)
   (map car
