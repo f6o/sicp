@@ -441,7 +441,7 @@
 (define (do-while-body exp)
   (cddr exp))
 
-;; ---
+;; for internal use
 
 (define (true? x)
   (not (eq? x #f)))
@@ -459,12 +459,15 @@
 (define (procedure-body p) (caddr p))
 (define (procedure-environment p) (cadddr p))
 
+;; for environment
+
 (define (enclosing-environment env) (cdr env))
 
 (define (first-frame env) (car env))
 
 (define the-empty-environment '())
 
+;; frames as a cons:  ((a b c) . (1 2 3))
 (define (make-frame variables values)
   (cons variables values))
 
@@ -482,6 +485,15 @@
           (error "Too many arguments supplied" vars vals)
           (error "Too few arguments supplied" vars vals))))
 
+;; TODO: WHY NOT RECURSIVELY CALL?
+;; MY ANSWER: because it depends on how frame and environment are implemented.
+
+;; (define (lookup var env)
+;;   (define (find-in frame)
+;;     "returns value if var is in frame or #f")
+;;   (or (find-in (first-frame env))
+;;       (lookup var (enclosing-environment env))))
+
 (define (lookup-variable-value var env)
   (define (env-loop env)
     (define (scan vars vals)
@@ -496,6 +508,8 @@
           (scan (frame-variables frame)
                 (frame-values frame)))))
   (env-loop env))
+
+;; seems like symiller structure above.
 
 (define (set-variable-value! var val env)
   (define (env-loop env)
@@ -522,6 +536,8 @@
             (else (scan (cdr vars) (cdr vals)))))
     (scan (frame-variables frame)
           (frame-values frame))))
+
+;; primitives
 
 (define (primitive-procedure? proc)
   (tagged-list? proc 'primitive))
@@ -553,6 +569,8 @@
   (apply-in-underlying-scheme
    (primitive-implementation proc) args))
 
+;; initialize
+
 (define (setup-environment)
   (let ((initial-env
          (extend-environment (primitive-procedure-names)
@@ -564,7 +582,7 @@
 
 (define the-global-environment (setup-environment))
 
-;; our own REPL!
+;; finally got a REPL!
 
 (define input-prompt ";;; M-Eval input:")
 (define output-prompt ";;; M-Eval value:")
