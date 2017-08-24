@@ -276,10 +276,12 @@
 ;; exercise 4.6 let
 
 (define (let->combination exp)
-  (let ((bindings (let-bindings exp)))
-    (cons (make-lambda (vars-in-bindings bindings)
-		       (let-body exp))
-	  (exps-in-bindings bindings))))
+  (if (named-let? exp)
+      (named-let->let exp)
+      (let ((bindings (let-bindings exp)))
+	(cons (make-lambda (vars-in-bindings bindings)
+			   (let-body exp))
+	      (exps-in-bindings bindings)))))
 
 (define (named-let? exp)
   (and (tagged-list? exp 'let)
@@ -313,10 +315,10 @@
 ;;
 ;; example 1:
 ;; 
-(let f ((n 5))
-  (if (= n 1)
-      1
-      (* n (f (- n 1)))))
+;; (let f ((n 5))
+;;   (if (= n 1)
+;;       1
+;;       (* n (f (- n 1)))))
 ;;
 ;; (let ()
 ;;   (define f (lambda (n)
@@ -488,6 +490,8 @@
         (list 'null? null?)
 	(list 'list list)
 	(list '+ +)
+	(list '- -)
+	(list '= =)
 	(list '* *)))
 
 (define (primitive-procedure-names)
