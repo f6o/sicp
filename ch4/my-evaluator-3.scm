@@ -467,9 +467,13 @@
 
 (define the-empty-environment '())
 
-;; frames as a cons:  ((a b c) . (1 2 3))
+;; frames as cons:  ((a b c) . (1 2 3))
 (define (make-frame variables values)
   (cons variables values))
+
+;; frames as a map ((a . 1) (b . 2) (c . 3))
+(define (make-frame variables values)
+  (map cons variables values))
 
 (define (frame-variables frame) (car frame))
 (define (frame-values frame) (cdr frame))
