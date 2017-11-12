@@ -496,7 +496,7 @@
   (map cdr frame))
 
 (define (add-binding-to-frame! var val frame)
-  (cons (cons var val) frame))
+  (set! frame (cons (cons var val) frame)))
 
 ;; TODO: WHY NOT RECURSIVELY CALL?
 ;; MY ANSWER: because it depends on how frame and environment are implemented.
