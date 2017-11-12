@@ -471,10 +471,6 @@
 (define (make-frame variables values)
   (cons variables values))
 
-;; frames as a map ((a . 1) (b . 2) (c . 3))
-(define (make-frame variables values)
-  (map cons variables values))
-
 (define (frame-variables frame) (car frame))
 (define (frame-values frame) (cdr frame))
 
@@ -488,6 +484,19 @@
       (if (< (length vars) (length vals))
           (error "Too many arguments supplied" vars vals)
           (error "Too few arguments supplied" vars vals))))
+
+;; frames as a map ((a . 1) (b . 2) (c . 3))
+(define (make-frame variables values)
+  (map cons variables values))
+
+(define (frame-variables frame)
+  (map car frame))
+
+(define (frame-values frame)
+  (map cdr frame))
+
+(define (add-binding-to-frame! var val frame)
+  (cons (cons var val) frame))
 
 ;; TODO: WHY NOT RECURSIVELY CALL?
 ;; MY ANSWER: because it depends on how frame and environment are implemented.
