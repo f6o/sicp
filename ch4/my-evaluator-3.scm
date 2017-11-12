@@ -509,7 +509,7 @@
                 (frame-values frame)))))
   (env-loop env))
 
-;; seems like symiller structure above.
+;; seems like similar structure above.
 
 (define (set-variable-value! var val env)
   (define (env-loop env)
