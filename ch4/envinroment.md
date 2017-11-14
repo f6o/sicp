@@ -39,3 +39,11 @@ is a name-value pair.
 
 (define my-frame-2 '((a . 1) (b . 2) (c . 3)))
 
+### define-variable!
+
+* only change the first frame of the environment, <env>
+* if the variable, <var> is unbound, add the binding, <var> and <val>
+  to the first frame.
+* otherwise, i.e. <var> is bound, change the bound value to <val>.
+
+
