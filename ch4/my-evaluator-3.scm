@@ -489,9 +489,6 @@
 (define (make-frame variables values)
   (map cons variables values))
 
-(define (add-binding-to-frame! var val frame)
-  (set! frame (cons (cons var val) frame)))
-
 (define (extend-environment vars vals base-env)
   (cons (make-frame vars vals) base-env))
 
