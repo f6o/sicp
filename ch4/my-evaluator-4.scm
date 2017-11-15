@@ -502,7 +502,7 @@
 	  (else (scan-out (cdr vars) (cdr vals)))))
   scan-out)
 
-;; TODO: excercise 4.12
+;; excercise 4.12
 ;; seems like similar structure above.
 (define (find-values var env)
   (define (env-loop env)
@@ -555,13 +555,10 @@
     (set-car! vals val)))
 
 (define (define-variable! var val env)
-  (let ((frame (first-frame env)))
-    (define (scan vars vals)
-      (cond ((null? vars)
-             (add-binding-to-frame! var val frame))
-            ((eq? var (car vars))
-             (set-car! vals val))
-            (else (scan (cdr vars) (cdr vals)))))
+  (let* ((frame (first-frame env))
+	 (null-proc (lambda () (add-binding-to-frame! var val frame)))
+	 (matched-proc (lambda (x) (set-car! x val)))
+	 (scan (make-scanner var null-proc matched-proc)))
     (scan (frame-variables frame)
           (frame-values frame))))
 
