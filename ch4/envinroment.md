@@ -8,19 +8,19 @@
 
 We use the following operations for manipulating environments:
 
-* (lookup-variable-value <var> <env>)
-  returns the value that is bound to the symbol <var>
-  in the environment <env>, or signals an error if the variable is unbound.
-* (extend-environment <variables> <values> <base-env>
+* (lookup-variable-value &lt;var&gt; &lt;env&gt;)
+  returns the value that is bound to the symbol &lt;var&gt;
+  in the environment &lt;env&gt;, or signals an error if the variable is unbound.
+* (extend-environment &lt;variables&gt; &lt;values&gt; &lt;base-env&gt;
   returns a new environment, consisting of a new frame in which the symbols in
-  the list <variables> are bound to the corresponding elements in the list
-  <values>, where the enclosing environment is <base-env>.
-* (define-variable! <var> <val> <env>)
-  adds to the first frame in the environment <env> a new binding that associates
-  the variable <var> with the value <value>
-* (set-variable-value! <var> <val> <env>)
-  changes the binding of the value <var> in the environment <env>
-  so that the variable is now bound to the value <value>, or signals
+  the list &lt;variables&gt; are bound to the corresponding elements in the list
+  &lt;values&gt;, where the enclosing environment is &lt;base-env&gt;.
+* (define-variable! &lt;var&gt; &lt;val&gt; &lt;env&gt;)
+  adds to the first frame in the environment &lt;env&gt; a new binding that associates
+  the variable &lt;var&gt; with the value &lt;value&gt;
+* (set-variable-value! &lt;var&gt; &lt;val&gt; &lt;env&gt;)
+  changes the binding of the value &lt;var&gt; in the environment &lt;env&gt;
+  so that the variable is now bound to the value &lt;value&gt;, or signals
   an error if the variable is unbound.
 
 ## The definition of frames in the textbook
@@ -29,7 +29,9 @@ Each frame of an environment is represented as a pair of lists:
      a list of the variables bound in that frame
      and a list of the associated values.
 
+```
 (define my-frame '((a b c) . (1 2 3)))
+```
 
 ## Excercise 4.11
 
@@ -37,13 +39,15 @@ Instead of representing a pair of lists,
 we can represent a frame as a list of bindings, where each binding
 is a name-value pair.
 
+```
 (define my-frame-2 '((a . 1) (b . 2) (c . 3)))
+```
 
 ### define-variable!
 
-* only change the first frame of the environment, <env>
-* if the variable, <var> is unbound, add the binding, <var> and <val>
+* only change the first frame of the environment, &lt;env&gt;
+* if the variable, &lt;var&gt; is unbound, add the binding, &lt;var&gt; and &lt;val&gt;
   to the first frame.
-* otherwise, i.e. <var> is bound, change the bound value to <val>.
+* otherwise, i.e. &lt;var&gt; is bound, change the bound value to &lt;val&gt;.
 
 
