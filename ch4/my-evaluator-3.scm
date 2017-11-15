@@ -574,15 +574,18 @@
 
 ;; excercise 4.11 MAPS VERSION
 (define (define-variable! var val env)
-  (define (scan bindings)
-    (cond ((null? bindings)
-	   (set! env (extend-environment (list var)
-					 (list val)
-					 env)))
-	  ((eq? var (caar bindings))
-	   (set-car! bindings (cons var val)))
-	  (else (scan (cdr bindings)))))
-  (scan (first-frame env)))
+  (if (eq? env the-empty-environment)
+      (error "Empty environment -- DEFINE!")
+      (let ((frame (first-frame env)))
+	(define (scan bindings)
+	  (cond ((null? (cdr bindings))
+		 (if (eq? var (caar bindings))
+		     (set-car! bindings (cons var val))
+		     (set-cdr! bindings (cons (cons var val) '()))))
+		((eq? var (caar bindings))
+		 (set-car! bindings (cons var val)))
+		(else (scan (cdr bindings)))))
+	(scan frame))))
 
 ;; primitives
 
