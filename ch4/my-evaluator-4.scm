@@ -562,6 +562,29 @@
     (scan (frame-variables frame)
           (frame-values frame))))
 
+;; excercise 4.13
+
+;; As in define-variable!, make-unbound! find the variable <var>
+;; only in the first frame of the environment <env>.
+(define (make-unbound! var env)
+  (define (scan vars vals)
+    (cond ((null? vars)
+	   '())
+	  ((eq? var (car vars))
+	   (scan (cdr vars) (cdr vals)))
+	  (else
+	   (cons (cons (car vars) (car vals))
+		 (scan (cdr vars) (cdr vals))))))
+  (let* ((frame (first-frame env))
+	 (m (scan (frame-variables frame)
+		  (frame-values frame))))
+    (set-car! frame (map car m))
+    (set-cdr! frame (map cdr m))))
+
+(put 'make-unbound!
+     (lambda (exp env)
+       (make-unbound! (definition-variable exp) env)))
+
 ;; primitives
 
 (define (primitive-procedure? proc)
