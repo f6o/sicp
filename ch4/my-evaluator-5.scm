@@ -468,22 +468,29 @@
 (define the-empty-environment '())
 
 ;; frames as cons:  ((a b c) . (1 2 3))
+;; (define (make-frame variables values)
+;;   (cons variables values))
+
+;; (define (frame-variables frame) (car frame))
+;; (define (frame-values frame) (cdr frame))
+
+;; (define (add-binding-to-frame! var val frame)
+;;   (set-car! frame (cons var (car frame)))
+;;   (set-cdr! frame (cons val (cdr frame))))
+
+;; (define (extend-environment vars vals base-env)
+;;   (if (= (length vars) (length vals))
+;;       (cons (make-frame vars vals) base-env)
+;;       (if (< (length vars) (length vals))
+;;           (error "Too many arguments supplied" vars vals)
+;;           (error "Too few arguments supplied" vars vals))))
+
+;; frames as a map ((a . 1) (b . 2) (c . 3))
 (define (make-frame variables values)
-  (cons variables values))
-
-(define (frame-variables frame) (car frame))
-(define (frame-values frame) (cdr frame))
-
-(define (add-binding-to-frame! var val frame)
-  (set-car! frame (cons var (car frame)))
-  (set-cdr! frame (cons val (cdr frame))))
+  (map cons variables values))
 
 (define (extend-environment vars vals base-env)
-  (if (= (length vars) (length vals))
-      (cons (make-frame vars vals) base-env)
-      (if (< (length vars) (length vals))
-          (error "Too many arguments supplied" vars vals)
-          (error "Too few arguments supplied" vars vals))))
+  (cons (make-frame vars vals) base-env))
 
 ;; TODO: WHY NOT RECURSIVELY CALL?
 ;; MY ANSWER: because it depends on how frame and environment are implemented.
@@ -493,28 +500,6 @@
 ;;     "returns value if var is in frame or #f")
 ;;   (or (find-in (first-frame env))
 ;;       (lookup var (enclosing-environment env))))
-
-(define (make-scanner var null-proc matched-proc)
-  (define (scan-out vars vals)
-    (cond ((null? vars) (null-proc))
-	  ((eq? var (car vars))
-	   (matched-proc vals))
-	  (else (scan-out (cdr vars) (cdr vals)))))
-  scan-out)
-
-;; excercise 4.12
-;; seems like similar structure above.
-(define (find-values var env)
-  (define (env-loop env)
-    (if (eq? env the-empty-environment)
-	(error "Unbound variable" var)
-	(let* ((frame (first-frame env))
-	       (null-proc (lambda () (env-loop (enclosing-environment env))))
-	       (matched-proc (lambda (x) x))
-	       (scan (make-scanner var null-proc matched-proc)))
-	  (scan (frame-variables frame)
-		(frame-values frame)))))
-  (env-loop env))
 
 ;; (define (lookup-variable-value var env)
 ;;   (define (env-loop env)
@@ -531,9 +516,21 @@
 ;;                 (frame-values frame)))))
 ;;   (env-loop env))
 
+;; excercise 4.11 MAPS VERSION
 (define (lookup-variable-value var env)
-  (let ((vals (find-values var env)))
-    (car vals)))
+  (define (env-loop env)
+    (define (scan bindings)
+      (cond ((null? bindings)
+	     (env-loop (enclosing-environment env)))
+	    ((eq? var (caar bindings))
+	     (cdar bindings))
+	    (else (scan (cdr bindings)))))
+    (if (eq? env the-empty-environment)
+	(error "Unbound variable -- SET!" var)
+	(scan (first-frame env))))
+  (env-loop env))
+
+;; seems like similar structure above.
 
 ;; (define (set-variable-value! var val env)
 ;;   (define (env-loop env)
@@ -550,40 +547,43 @@
 ;;                 (frame-values frame)))))
 ;;   (env-loop env))
 
+;; excercise 4.11 MAPS VERSION
 (define (set-variable-value! var val env)
-  (let ((vals (find-values var env)))
-    (set-car! vals val)))
+  (define (env-loop env)
+    (define (scan bindings)
+      (cond ((null? bindings)
+	     (env-loop (enclosing-environment env)))
+	    ((eq? var (caar bindings))
+	     (set-car! bindings (cons var val)))
+	    (else (scan (cdr bindings))))) 
+    (if (eq? env the-empty-environment)
+	(error "Unbound variable -- SET!" var)
+	(scan (first-frame env))))
+  (env-loop env))
 
+;; (define (define-variable! var val env)
+;;   (let ((frame (first-frame env)))
+;;     (define (scan vars vals)
+;;       (cond ((null? vars)
+;;              (add-binding-to-frame! var val frame))
+;;             ((eq? var (car vars))
+;;              (set-car! vals val))
+;;             (else (scan (cdr vars) (cdr vals)))))
+;;     (scan (frame-variables frame)
+;;           (frame-values frame))))
+
+;; excercise 4.11 MAPS VERSION
 (define (define-variable! var val env)
-  (let* ((frame (first-frame env))
-	 (null-proc (lambda () (add-binding-to-frame! var val frame)))
-	 (matched-proc (lambda (x) (set-car! x val)))
-	 (scan (make-scanner var null-proc matched-proc)))
-    (scan (frame-variables frame)
-          (frame-values frame))))
-
-;; excercise 4.13
-
-;; As in define-variable!, make-unbound! find the variable <var>
-;; only in the first frame of the environment <env>.
-(define (make-unbound! var env)
-  (define (scan vars vals)
-    (cond ((null? vars)
-	   '())
-	  ((eq? var (car vars))
-	   (scan (cdr vars) (cdr vals)))
-	  (else
-	   (cons (cons (car vars) (car vals))
-		 (scan (cdr vars) (cdr vals))))))
-  (let* ((frame (first-frame env))
-	 (m (scan (frame-variables frame)
-		  (frame-values frame))))
-    (set-car! frame (map car m))
-    (set-cdr! frame (map cdr m))))
-
-(put 'make-unbound!
-     (lambda (exp env)
-       (make-unbound! (definition-variable exp) env)))
+  (if (eq? env the-empty-environment)
+      (error "Empty environment -- DEFINE!")
+      (let ((frame (first-frame env)))
+	(define (scan bindings)
+	  (cond ((eq? var (caar bindings))
+		 (set-car! bindings (cons var val)))
+		((null? (cdr bindings))
+		 (set-cdr! bindings (cons (cons var val) '())))
+		(else (scan (cdr bindings)))))
+	(scan frame))))
 
 ;; primitives
 
