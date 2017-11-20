@@ -16,3 +16,9 @@
 (eval '(define a 10) the-global-environment)
 (eval-assert = 10 'a "redefining a global value")
 
+(eval '(define (g x)
+	 (define u 90)
+	 (define v 900)
+	 (+ u v x))
+      the-global-environment)
+(eval-assert = 999 '(g 9) "inner definition")
