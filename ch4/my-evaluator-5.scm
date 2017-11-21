@@ -450,7 +450,6 @@
   (eq? x #f))
 
 (define (make-procedure parameters body env)
-  (print body)
   (list 'procedure parameters
 	(scan-out-defines body)
 	env))
@@ -552,6 +551,7 @@
 ;;     (set! u <e1>)
 ;;     (set! v <e2>)
 ;;     <e3>))
+;;
 (define (scan-out-defines body)
   (let ((defs (filter (lambda (exp)
 			(and (pair? exp)
@@ -562,19 +562,14 @@
 			       (or (not (pair? exp))
 				   (not (eq? (car exp) 'define))))
 			     (cddr body))))
-	  (list 'lambda
-		(cadr body)
-		(append
-		 (list  'let
-			(map (lambda (x) (list (definition-variable x) '*unassigned*)) defs))
-		 (append (map (lambda (x) (list 'set!
-						(definition-variable x)
+	  (append
+	   (list  'let
+		  (map (lambda (x) (list (definition-variable x) '*unassigned*)) defs))
+	   (append (map (lambda (x) (list 'set!
+					  (definition-variable x)
 					  (definition-value x))) defs)
-			 rest))))
-	
-	body))
-  
-)
+		   rest)))
+	body)))
 ;; seems like similar structure above.
 
 ;; (define (set-variable-value! var val env)
