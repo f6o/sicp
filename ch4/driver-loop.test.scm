@@ -22,3 +22,12 @@
 	 (+ u v x))
       the-global-environment)
 (eval-assert = 999 '(g 9) "inner definition")
+
+(eval '(define (h x)
+	 (define (even? n)
+	   (if (= n 0) true (odd? (- n 1))))
+	 (define (odd? n)
+	   (if (= n 1) false (even? (- n 1))))
+	 (even? x))
+      the-global-environment)
+(eval-assert = #t '(h 10) "inner definition 2")
