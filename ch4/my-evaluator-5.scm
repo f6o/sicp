@@ -451,8 +451,6 @@
 
 (define (make-procedure parameters body env)
   (let ((nb (scan-out-defines body)))
-    (print parameters)
-    (print nb)
     (list 'procedure parameters nb env)))
 
 (define (compound-procedure? p)
