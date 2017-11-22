@@ -469,54 +469,12 @@
 
 (define the-empty-environment '())
 
-;; frames as cons:  ((a b c) . (1 2 3))
-;; (define (make-frame variables values)
-;;   (cons variables values))
-
-;; (define (frame-variables frame) (car frame))
-;; (define (frame-values frame) (cdr frame))
-
-;; (define (add-binding-to-frame! var val frame)
-;;   (set-car! frame (cons var (car frame)))
-;;   (set-cdr! frame (cons val (cdr frame))))
-
-;; (define (extend-environment vars vals base-env)
-;;   (if (= (length vars) (length vals))
-;;       (cons (make-frame vars vals) base-env)
-;;       (if (< (length vars) (length vals))
-;;           (error "Too many arguments supplied" vars vals)
-;;           (error "Too few arguments supplied" vars vals))))
-
 ;; frames as a map ((a . 1) (b . 2) (c . 3))
 (define (make-frame variables values)
   (map cons variables values))
 
 (define (extend-environment vars vals base-env)
   (cons (make-frame vars vals) base-env))
-
-;; TODO: WHY NOT RECURSIVELY CALL?
-;; MY ANSWER: because it depends on how frame and environment are implemented.
-
-;; (define (lookup var env)
-;;   (define (find-in frame)
-;;     "returns value if var is in frame or #f")
-;;   (or (find-in (first-frame env))
-;;       (lookup var (enclosing-environment env))))
-
-;; (define (lookup-variable-value var env)
-;;   (define (env-loop env)
-;;     (define (scan vars vals)
-;;       (cond ((null? vars)
-;;              (env-loop (enclosing-environment env)))
-;;             ((eq? var (car vars))
-;;              (car vals))
-;;             (else (scan (cdr vars) (cdr vals)))))
-;;     (if (eq? env the-empty-environment)
-;;         (error "Unbound variable" var)
-;;         (let ((frame (first-frame env)))
-;;           (scan (frame-variables frame)
-;;                 (frame-values frame)))))
-;;   (env-loop env))
 
 ;; excercise 4.11 MAPS VERSION
 (define (lookup-variable-value var env)
@@ -547,7 +505,7 @@
 ;;
 ;; (lambda <vars>
 ;;   (let ((u *unassigned*)
-;; 	(v *unassigned*))
+;;         (v *unassigned*))
 ;;     (set! u <e1>)
 ;;     (set! v <e2>)
 ;;     <e3>))
@@ -570,22 +528,7 @@
 					  (definition-value x))) defs)
 		   rest)))
 	body)))
-;; seems like similar structure above.
 
-;; (define (set-variable-value! var val env)
-;;   (define (env-loop env)
-;;     (define (scan vars vals)
-;;       (cond ((null? vars)
-;;              (env-loop (enclosing-environment env)))
-;;             ((eq? var (car vars))
-;;              (set-car! vals val))
-;;             (else (scan (cdr vars) (cdr vals)))))
-;;     (if (eq? env the-empty-environment)
-;;         (error "Unbound variable -- SET!" var)
-;;         (let ((frame (first-frame env)))
-;;           (scan (frame-variables frame)
-;;                 (frame-values frame)))))
-;;   (env-loop env))
 
 ;; excercise 4.11 MAPS VERSION
 (define (set-variable-value! var val env)
@@ -600,17 +543,6 @@
 	(error "Unbound variable -- SET!" var)
 	(scan (first-frame env))))
   (env-loop env))
-
-;; (define (define-variable! var val env)
-;;   (let ((frame (first-frame env)))
-;;     (define (scan vars vals)
-;;       (cond ((null? vars)
-;;              (add-binding-to-frame! var val frame))
-;;             ((eq? var (car vars))
-;;              (set-car! vals val))
-;;             (else (scan (cdr vars) (cdr vals)))))
-;;     (scan (frame-variables frame)
-;;           (frame-values frame))))
 
 ;; excercise 4.11 MAPS VERSION
 (define (define-variable! var val env)
