@@ -450,9 +450,10 @@
   (eq? x #f))
 
 (define (make-procedure parameters body env)
-  (list 'procedure parameters
-	(scan-out-defines body)
-	env))
+  (let ((nb (scan-out-defines body)))
+    (print parameters)
+    (print nb)
+    (list 'procedure parameters nb env)))
 
 (define (compound-procedure? p)
   (tagged-list? p 'procedure))
@@ -519,14 +520,14 @@
 	(let* ((rest (filter (lambda (exp)
 			       (or (not (pair? exp))
 				   (not (eq? (car exp) 'define))))
-			     (cddr body))))
-	  (append
-	   (list  'let
-		  (map (lambda (x) (list (definition-variable x) '*unassigned*)) defs))
-	   (append (map (lambda (x) (list 'set!
-					  (definition-variable x)
-					  (definition-value x))) defs)
-		   rest)))
+			     (cdr body))))
+	  (list (append
+		 (list  'let
+			(map (lambda (x) (list (definition-variable x) ''*unassigned*)) defs))
+		 (append (map (lambda (x) (list 'set!
+						(definition-variable x)
+						(definition-value x))) defs)
+			 rest))))
 	body)))
 
 
