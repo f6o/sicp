@@ -24,7 +24,7 @@
 ;;**implementation-dependent loading of evaluator file
 ;;Note: It is loaded first so that the section 4.2 definition
 ;; of eval overrides the definition from 4.1.1
-(load "ch4-mceval.scm")
+(load "./ch4-mceval.scm")
 
 
 ;;;SECTION 4.2.2

@@ -14,6 +14,10 @@
 ;;;from section 4.1.4 -- must precede def of metacircular apply
 (define apply-in-underlying-scheme apply)
 
+;;; for gauche
+(define true #true)
+(define false #false)
+
 ;;;SECTION 4.1.1
 
 (define (eval exp env)
