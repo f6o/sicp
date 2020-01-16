@@ -32,6 +32,7 @@
 ;;; Modifying the evaluator
 
 (define (eval exp env)
+  ;; (begin (newline) (display "-- eval: ") (display exp)) 
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
@@ -115,6 +116,7 @@
 ;; thunks
 
 (define (delay-it exp env)
+  ;; (begin (newline) (display "-- delay: ") (display exp))
   (list 'thunk exp env))
 
 (define (thunk? obj)
